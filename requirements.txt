@@ -1,0 +1,11 @@
+cloudpickle==3.1.2
+Farama-Notifications==0.0.4
+gymnasium==1.2.3
+numpy==2.2.6
+opencv-python==4.13.0.92
+-e git+https://github.com/qgallouedec/panda-gym/@10c4d8adaab07d8a29b2f8dc0aa85f8edd8532ae#egg=panda_gym
+pillow==12.2.0
+pybullet==3.2.7
+scipy==1.15.3
+tqdm==4.67.3
+typing_extensions==4.15.0
