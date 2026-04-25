@@ -2,9 +2,7 @@ from panda_gym.envs.core import RobotTaskEnv
 from panda_gym.pybullet import PyBullet
 from panda_gym.envs.robots.panda import Panda
 
-# from custom_task_test import MyTask
-# from pandas_tutorial_ctask import MyTask
-from task_searchpath_test import MyTask
+from customtask import MyTask
 
 
 class MyRobotTaskEnv(RobotTaskEnv):
@@ -14,6 +12,7 @@ class MyRobotTaskEnv(RobotTaskEnv):
         sim = PyBullet(render_mode=render_mode)
         robot = Panda(sim)
         task = MyTask(sim)
+
         super().__init__(robot, task)
 
 
@@ -29,8 +28,6 @@ if __name__ == "__main__":
         observation, reward, terminated, truncated, info = env.step(action)
         
         time.sleep(0.01)
-
-        env.reset()
 
         if terminated or truncated:
             observation, info = env.reset()

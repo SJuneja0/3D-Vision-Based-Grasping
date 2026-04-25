@@ -1,2 +1,3 @@
 venv/
 panda-gym/
+__pycache__/
