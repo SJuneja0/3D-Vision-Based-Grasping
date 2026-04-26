@@ -6,9 +6,9 @@ Steps:
 - Define episode //
 - Render camera view //
 1b. Objects in Sim
+- Learn how to render new objects in Sim from pandas datasest //
 - Get access to obj database
-- Learn how to render them in Sim
-- Create automated script to add obj in specific pose
+- Learn how to add custom objects
 
 2. Implement 3D rendering programs
 - Add SAM3Dify
@@ -32,7 +32,3 @@ Representation (RGB vs 3D point cloud)
 RL grasp policy (PPO)
     ↓
 Evaluation (grasp success rate)
-
-TODO:
-- Create a script that allows you to see a camera moving in an enviorment
-- Add a custom object to the enviorment
