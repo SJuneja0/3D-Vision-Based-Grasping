@@ -17,7 +17,7 @@ class camera():
         self.render_near = render_near
         self.render_far = render_far
 
-    def renderEE(self, robot_id, EE_idx, computeFK=True):
+    def renderEE(self, robot_id, EE_idx=8, computeFK=True):
         link_state = self.pb_client.getLinkState(robot_id, EE_idx, computeForwardKinematics=computeFK)
 
         pos = link_state[0]
