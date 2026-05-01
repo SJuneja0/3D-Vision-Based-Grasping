@@ -3,9 +3,10 @@ from panda_gym.envs.tasks.pick_and_place import PickAndPlace
 import numpy as np
 
 class FinalPickAndPlace(PickAndPlace):
-    def __init__(self, sim):
+    def __init__(self, sim, urdf):
         self.sim = sim
         self.sim.physics_client.setAdditionalSearchPath("data/object2urdf/examples/ycb_assets/")
+        self.urdf = urdf
         self.object_size = 0.05 #TODO: Get an estimation for the approx height of the urdf objects
         super().__init__(sim)
 
@@ -18,7 +19,7 @@ class FinalPickAndPlace(PickAndPlace):
 
         self.object_id = self.sim.loadURDF(
             body_name="object",
-            fileName="006_mustard_bottle.urdf",
+            fileName=self.urdf,
             # fileName="002_master_chef_can.urdf",
             # fileName="soccerball.urdf",
             basePosition=[0.5, 0, 0.1],
