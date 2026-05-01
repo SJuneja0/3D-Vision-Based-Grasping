@@ -1,0 +1,8 @@
+# Objects removed from YCB database
+019_pitcher_base
+029_plate 
+036_wood_block 
+070-a_colored_wood_blocks
+071_nine_hole_peg_test
+072-a_toy_airplane
+073-g_lego_duplo

@@ -7,8 +7,9 @@ Steps:
 - Render camera view //
 1b. Objects in Sim
 - Learn how to render new objects in Sim from pandas datasest //
-- Get access to obj database
-- Learn how to add custom objects
+- Get access to obj database //
+- Learn how to add custom objects //
+- Adjust all URDF's to be proper for the env
 
 2. Implement 3D rendering programs
 - Add SAM3Dify
