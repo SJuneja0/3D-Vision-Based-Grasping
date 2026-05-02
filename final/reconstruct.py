@@ -46,6 +46,24 @@ class reconstruct():
     def sample_gpc(self, gpc, voxel_size):
         return gpc.voxel_down_sample(voxel_size=voxel_size)
 
-    def remove_outliers(self, gpc, nb_neighbors, std_ratio):
+    def clean_gpc(self, gpc, nb_neighbors, std_ratio, num_points):
+        # Remove Outliers
         gpc, _ = gpc.remove_statistical_outlier(nb_neighbors=nb_neighbors, std_ratio=std_ratio)
-        return gpc
+
+        # Normalize points around a center and size
+        global_points = np.asarray(gpc.points)
+        center = global_points.mean(axis=0)
+        points -= center
+        scale = np.max(np.linalg.norm(global_points, axis=1))
+        global_points /= scale
+
+        # Fix the number of points for training a NN (Fixed input size)
+        if len(global_points) > num_points:
+            idx = np.random.choice(len(global_points), num_points, replace=False)
+        else:
+            idx = np.random.choice(len(global_points), num_points, replace=True)
+
+        global_points = global_points[idx]
+
+    def viz_gpc(self, gcp):
+        o3d.visualization.draw_geometries([gcp])

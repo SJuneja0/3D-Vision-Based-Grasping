@@ -27,15 +27,16 @@ class train():
             if img_path == None:
                 print("NO VALID IMAGE PATH PASSED")
                 return None
-            rgb, _, _, _ = self.cam.renderEE(robot_id=self.env.sim._bodies_idx["panda"])
+            rgb, depth, pos, quat = self.cam.renderEE(robot_id=self.env.sim._bodies_idx["panda"])
             Image.fromarray(rgb).save(img_path)
-            return rgb
+            return rgb, depth, pos, quat
     
     def change_env(self, urdf):
         self.env.close()
         self.env = FinalEnv(render_mode="human", urdf=urdf)
         self.cam = camera(pb_client=self.env.sim.physics_client)
 
+    # TODO
     def move_in_frame(): # moves the robot to start above the obj
          pass
 
@@ -45,8 +46,6 @@ if __name__ == "__main__":
     parser.add_arguement("--agent", help="The agent")
     args = parser.parse_args()
     print(args.test)
-
-    
 
     trainer = train()
     list_urdf = args.agent.list_URDF()
@@ -59,20 +58,34 @@ if __name__ == "__main__":
         observation, info = trainer.env.reset()
 
         # Move robot above obj and collect images
+        images_info = []
         term = False
         while not term:
             term = trainer.move_in_frame()
             img_path = None
-            trainer.take_pic(img_path)  
+            rgb, depth, pos, quat = trainer.take_pic(img_path) 
+            images_info.append( (rgb, depth, pos, quat) )
+
+
+        # potentially add additional pictures here from other angles to make a better picture
 
         # Create a 3D representation of the object based on the photos
-        # Maybe let the robot cheat a bit to include some pictures from different angles 
-        # Since it moves in one plane it might not make a good 3D model
-        pass
+        # TODO: Need to remove background, can only have object in point cloud
+        
+        # TODO: Fill in None
+        dataset = []
+        for (rgb, depth, pos, quat) in images_info:
+            intrinsic = {"width" : None, "height" : None, "fx" : None, "fy" : None, "cx" : None, "cy" : None}
+            camera_pose = None
+            dataset.append( (rgb, depth, intrinsic, camera_pose) )
+        recon = reconstruct()
+        gpc = recon.create_global_pointcloud(dataset)
+        trimmed_gpc = recon.clean_gpc(gpc=gpc, nb_neighbors=None, std_ratio=None, num_points=None)
+        recon.viz_gpc(trimmed_gpc)
 
         for j in range(trainer.time_steps):
 
-            action = None
+            action = None # TODO
             observation, reward, terminated, truncated, info = trainer.env.step(action)
-            pass # Finish the rest of the logic
+            pass # TODO Finish the rest of the logic
 
