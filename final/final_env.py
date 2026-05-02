@@ -12,6 +12,7 @@ class FinalEnv(RobotTaskEnv):
 
     def __init__(self, render_mode, urdf):
         self.sim = PyBullet(render_mode=render_mode)
+        # self.robot = Panda(self.sim, base_position=np.array([0, 0, 0])) #TODO: Change this val later
         self.robot = Panda(self.sim)
         self.task = FinalPickAndPlace(self.sim, urdf)        
 

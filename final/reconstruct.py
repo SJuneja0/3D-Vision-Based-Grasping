@@ -46,14 +46,14 @@ class reconstruct():
     def sample_global_pc(self, global_pc, voxel_size):
         return global_pc.voxel_down_sample(voxel_size=voxel_size)
 
-    def clean_global_pc(self, global_pc, nb_neighbors, std_ratio, num_points):
+    def clean_global_pc(self, global_pc, nb_neighbors=20, std_ratio=0.2, num_points=1024):
         # Remove Outliers
         global_pc, _ = global_pc.remove_statistical_outlier(nb_neighbors=nb_neighbors, std_ratio=std_ratio)
 
         # Normalize points around a center and size
         global_points = np.asarray(global_pc.points)
         center = global_points.mean(axis=0)
-        points -= center
+        global_points -= center
         scale = np.max(np.linalg.norm(global_points, axis=1))
         global_points /= scale
 

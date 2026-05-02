@@ -76,3 +76,36 @@ class camera():
         rgb = np.reshape(rgb, (self.image_height, self.image_width, 4))[:, :, :3]
         return rgb, depth
 
+
+    def compute_intrinsics(self):
+        width = self.image_width
+        height = self.image_height
+        fx = width / (2 * np.tan( np.deg2rad(self.fov) / 2 ))
+        fy = height / (2 * np.tan( np.deg2rad(self.fov) / 2 ))
+        cx = width / 2
+        cy = height / 2
+
+        intinsics = {
+            "width" : width,
+            "height" : height,
+            "fx" : fx,
+            "fy" : fy,
+            "cx" : cx,
+            "cy" : cy
+        }
+
+        return intinsics
+    
+    def compute_xform(self, pos, quat):
+        xform = np.eye(4)
+        rot = np.array(pb.getMatrixFromQuaternion(quat)).reshape(3, 3)
+        t = np.array(pos).transpose()
+        # print("ROTATION: ", rot)
+        # print("TRANSFORMATION: ", t)
+
+        xform[:3, :3] = rot
+        xform[:3, 3] = t # check shape
+        # print("XFORM: ", xform)
+
+        return xform # may need to do inverse if this is world -> cam
+

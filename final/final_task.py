@@ -20,10 +20,8 @@ class FinalPickAndPlace(PickAndPlace):
         self.object_id = self.sim.loadURDF(
             body_name="object",
             fileName=self.urdf,
-            # fileName="002_master_chef_can.urdf",
-            # fileName="soccerball.urdf",
             basePosition=[0.5, 0, 0.1],
-            # useFixedBase=False
+            useFixedBase=True
         )
 
         self.sim.create_box(
@@ -38,7 +36,7 @@ class FinalPickAndPlace(PickAndPlace):
     # Function is used to control obj position after reset (USE THIS)
     def _sample_object(self) -> np.ndarray:
         """Randomize start position of object."""
-        object_position = np.array([-0.5, 0.0, 0.2])
+        object_position = np.array([0.5, 0.0, 0.2])
         # noise = self.np_random.uniform(self.obj_range_low, self.obj_range_high)
         # object_position += noise
         print("object position: ", object_position)

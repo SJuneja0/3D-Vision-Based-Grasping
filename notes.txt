@@ -10,6 +10,8 @@ Steps:
 - Get access to obj database //
 - Learn how to add custom objects //
 - Adjust all URDF's to be proper for the env //
+- TODO: Move table infront of Robot
+- TODO: Figure out the rest of the task params (spawn-space of urdf's)
 
 2. Implement 3D rendering programs
 2a. Develop initial pipeline
