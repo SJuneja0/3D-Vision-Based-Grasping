@@ -113,7 +113,6 @@ if __name__ == "__main__":
             action = model(input)
             observation, reward, terminated, truncated, info = trainer.env.step(action)
 
-        #     pass # TODO Finish the rest of the logic
 
     print("-----Terminating Env-----")
     trainer.env.close()
