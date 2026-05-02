@@ -32,7 +32,7 @@ class reconstruct():
         return pc
     
     def create_global_pointcloud(self, dataset):
-        global_pcd = o3d.geometry.PointCloud()
+        global_pc = o3d.geometry.PointCloud()
 
         for rgb, depth, intrinsic, camera_pose in dataset:
             pc = self.create_pointcloud(rgb, depth, intrinsic)
@@ -43,15 +43,15 @@ class reconstruct():
         return global_pc
     
     # add default value maybe?
-    def sample_gpc(self, gpc, voxel_size):
-        return gpc.voxel_down_sample(voxel_size=voxel_size)
+    def sample_global_pc(self, global_pc, voxel_size):
+        return global_pc.voxel_down_sample(voxel_size=voxel_size)
 
-    def clean_gpc(self, gpc, nb_neighbors, std_ratio, num_points):
+    def clean_global_pc(self, global_pc, nb_neighbors, std_ratio, num_points):
         # Remove Outliers
-        gpc, _ = gpc.remove_statistical_outlier(nb_neighbors=nb_neighbors, std_ratio=std_ratio)
+        global_pc, _ = global_pc.remove_statistical_outlier(nb_neighbors=nb_neighbors, std_ratio=std_ratio)
 
         # Normalize points around a center and size
-        global_points = np.asarray(gpc.points)
+        global_points = np.asarray(global_pc.points)
         center = global_points.mean(axis=0)
         points -= center
         scale = np.max(np.linalg.norm(global_points, axis=1))
@@ -65,5 +65,5 @@ class reconstruct():
 
         global_points = global_points[idx]
 
-    def viz_gpc(self, gcp):
-        o3d.visualization.draw_geometries([gcp])
+    def viz_pc(self, pc):
+        o3d.visualization.draw_geometries([pc])

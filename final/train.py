@@ -11,6 +11,7 @@ from list_urdf import listURDF
 import argparse
 import random
 from reconstruct import reconstruct
+import numpy as np
 
 class train():
     def __init__(self, episodes=3, time_steps=500):
@@ -36,9 +37,13 @@ class train():
         self.env = FinalEnv(render_mode="human", urdf=urdf)
         self.cam = camera(pb_client=self.env.sim.physics_client)
 
-    # TODO
-    def move_in_frame(): # moves the robot to start above the obj
-         pass
+    def move_in_frame(self, observation, z_offset=0.2): # moves the robot to start above the obj
+        obj_pose = observation["achieved_goal"][0:3]
+        robot_pose = observation["observation"][0:3]
+        xy_action = obj_pose[0:2] - robot_pose[0:2]
+        z_action = obj_pose[2] + z_offset - robot_pose[2]
+        
+        return np.array(np.append(np.append(robot_pose, z_action), 0))
 
 if __name__ == "__main__": 
     parser = argparse.ArgumentParser()
@@ -61,7 +66,7 @@ if __name__ == "__main__":
         images_info = []
         term = False
         while not term:
-            term = trainer.move_in_frame()
+            term = trainer.move_in_frame(observation)
             img_path = None
             rgb, depth, pos, quat = trainer.take_pic(img_path) 
             images_info.append( (rgb, depth, pos, quat) )
@@ -70,18 +75,25 @@ if __name__ == "__main__":
         # potentially add additional pictures here from other angles to make a better picture
 
         # Create a 3D representation of the object based on the photos
-        # TODO: Need to remove background, can only have object in point cloud
+        # TODO: Need to remove background, can only have object in point cloud -> Color filterings?
+        # Could also just take pics around the object and not make it relate to being eye-in-hand
         
         # TODO: Fill in None
         dataset = []
         for (rgb, depth, pos, quat) in images_info:
-            intrinsic = {"width" : None, "height" : None, "fx" : None, "fy" : None, "cx" : None, "cy" : None}
-            camera_pose = None
+            intrinsic = trainer.cam.compute_intrinsics()
+            camera_pose = trainer.cam.compute_xform(pos, quat)
             dataset.append( (rgb, depth, intrinsic, camera_pose) )
         recon = reconstruct()
-        gpc = recon.create_global_pointcloud(dataset)
-        trimmed_gpc = recon.clean_gpc(gpc=gpc, nb_neighbors=None, std_ratio=None, num_points=None)
-        recon.viz_gpc(trimmed_gpc)
+
+        ## TEST
+        for (rgb, depth, intrinsic, camera_pose) in dataset:
+            pc = recon.create_pointcloud(rgb, depth, intrinsic)
+            recon.viz_pc(pc)
+        global_pc = recon.create_global_pointcloud(dataset)
+        trimmed_global_pc = recon.clean_global_pc(global_pc=global_pc, nb_neighbors=None, std_ratio=None, num_points=None)
+        recon.viz_pc(trimmed_global_pc)
+        # ENDTEST
 
         for j in range(trainer.time_steps):
 

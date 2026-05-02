@@ -9,15 +9,22 @@ Steps:
 - Learn how to render new objects in Sim from pandas datasest //
 - Get access to obj database //
 - Learn how to add custom objects //
-- Adjust all URDF's to be proper for the env
+- Adjust all URDF's to be proper for the env //
 
 2. Implement 3D rendering programs
+2a. Develop initial pipeline
+- Add a reconstruction pipeline
+- Reconstruct an object and view it
+- Clean reconstruction for input to NN
+2b. Optionally add additional reconstructions
 - Add SAM3Dify
 - COLMAP SfM
 - Add Gaussian Splatting
 - Add learning based creation
 
 3. Test learning based algorithms
+- Create and train a simple NN (maybe CNN)
+- Create and test a reinforcement learning based algorithm
 - Test Naive algorithm and collect data
 - Create and test DAGGER algorithm (or others depending on further research)
 
