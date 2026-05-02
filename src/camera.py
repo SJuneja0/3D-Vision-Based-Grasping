@@ -38,7 +38,7 @@ class camera():
             farVal=self.render_far
         )
 
-        _, _, rgb, depth, _ = self.pb_client.getCameraImage(
+        _, _, rgb, depth, seg = self.pb_client.getCameraImage(
             width=self.image_width,
             height=self.image_height,
             viewMatrix=view,
@@ -46,7 +46,7 @@ class camera():
         )
 
         rgb = np.reshape(rgb, (self.image_height, self.image_width, 4))[:, :, :3]
-        return rgb, depth, pos, quat
+        return rgb, depth, seg, pos, quat
     
 
     def renderPosQuat(self, pos, quat):
@@ -66,7 +66,7 @@ class camera():
             farVal=self.render_far
         )
 
-        _, _, rgb, depth, _ = self.pb_client.getCameraImage(
+        _, _, rgb, depth, seg = self.pb_client.getCameraImage(
             width=self.image_width,
             height=self.image_height,
             viewMatrix=view,
@@ -74,7 +74,7 @@ class camera():
         )
 
         rgb = np.reshape(rgb, (self.image_height, self.image_width, 4))[:, :, :3]
-        return rgb, depth
+        return rgb, depth, seg, pos, quat
 
 
     def compute_intrinsics(self):

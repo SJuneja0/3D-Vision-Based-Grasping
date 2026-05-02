@@ -12,8 +12,8 @@ class FinalEnv(RobotTaskEnv):
 
     def __init__(self, render_mode, urdf):
         self.sim = PyBullet(render_mode=render_mode)
-        # self.robot = Panda(self.sim, base_position=np.array([0, 0, 0])) #TODO: Change this val later
-        self.robot = Panda(self.sim)
+        self.robot = Panda(self.sim, base_position=np.array([-0.5, 0, 0])) #TODO: Change this val later
+        # self.robot = Panda(self.sim)
         self.task = FinalPickAndPlace(self.sim, urdf)        
 
         super().__init__(self.robot, self.task)
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     env = FinalEnv(render_mode="human")
 
     cam = camera(pb_client=env.sim.physics_client)
-    rgb, _, _, _ = cam.renderEE(robot_id=env.sim._bodies_idx["panda"])
+    rgb, depth, seg, pos, quat = cam.renderEE(robot_id=env.sim._bodies_idx["panda"])
     img_path = f"final/cam_test.png"
     Image.fromarray(rgb).save(img_path)
     

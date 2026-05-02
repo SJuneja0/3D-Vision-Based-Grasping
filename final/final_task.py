@@ -7,7 +7,6 @@ class FinalPickAndPlace(PickAndPlace):
         self.sim = sim
         self.sim.physics_client.setAdditionalSearchPath("data/object2urdf/examples/ycb_assets/")
         self.urdf = urdf
-        self.object_size = 0.05 #TODO: Get an estimation for the approx height of the urdf objects
         super().__init__(sim)
 
     
@@ -17,16 +16,17 @@ class FinalPickAndPlace(PickAndPlace):
         self.sim.create_plane(z_offset=-0.4)
         self.sim.create_table(length=1.1, width=0.7, height=0.4, x_offset=-0.3)
 
-        self.object_id = self.sim.loadURDF(
+        self.sim.loadURDF(
             body_name="object",
             fileName=self.urdf,
-            basePosition=[0.5, 0, 0.1],
+            basePosition=[0., 0., 0.2],
             useFixedBase=True
         )
+        self.object_id = self.sim._bodies_idx["object"]
 
         self.sim.create_box(
             body_name="target",
-            half_extents=np.ones(3) * self.object_size / 2,
+            half_extents=np.ones(3) * 0.025,
             mass=0.0,
             ghost=True,
             position=np.array([0.0, 0.0, 0.05]),
@@ -36,9 +36,14 @@ class FinalPickAndPlace(PickAndPlace):
     # Function is used to control obj position after reset (USE THIS)
     def _sample_object(self) -> np.ndarray:
         """Randomize start position of object."""
-        object_position = np.array([0.5, 0.0, 0.2])
-        # noise = self.np_random.uniform(self.obj_range_low, self.obj_range_high)
-        # object_position += noise
+        aabb_min, aabb_max = self.sim.physics_client.getAABB(self.object_id)
+        object_height = aabb_max[2] - aabb_min[2]
+
+        print("Object Height: ", object_height)
+
+        object_position = np.array([0, 0.0, object_height / 2])
+        noise = self.np_random.uniform(self.obj_range_low, self.obj_range_high)
+        object_position += noise
         print("object position: ", object_position)
         return object_position
 

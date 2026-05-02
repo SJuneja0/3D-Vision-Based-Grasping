@@ -65,5 +65,17 @@ class reconstruct():
 
         global_points = global_points[idx]
 
+        return global_points
+    
+
+    def numpy_to_pc(self, array):
+        pc = o3d.geometry.PointCloud()
+        pc.points = o3d.utility.Vector3dVector(array)
+        return pc
+
+
     def viz_pc(self, pc):
         o3d.visualization.draw_geometries([pc])
+
+    def mask_for_id(self, id):
+        mask = (seg == id)

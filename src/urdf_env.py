@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
         # Set up cam and take picture
         cam = camera(pb_client=pb_client)
-        rgb, _, _, _ = cam.renderEE(robot_id=env.sim._bodies_idx["panda"])
+        rgb, depth, seg, pos, quat = cam.renderEE(robot_id=env.sim._bodies_idx["panda"])
         img_path = f"src/obj_images/{urdf[:-5]}.png"
         Image.fromarray(rgb).save(img_path)
         

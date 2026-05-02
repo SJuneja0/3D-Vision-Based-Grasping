@@ -29,9 +29,9 @@ class train():
             if img_path == None:
                 print("NO VALID IMAGE PATH PASSED")
                 return None
-            rgb, depth, pos, quat = self.cam.renderEE(robot_id=self.env.sim._bodies_idx["panda"])
+            rgb, depth, seg, pos, quat = self.cam.renderEE(robot_id=self.env.sim._bodies_idx["panda"])
             Image.fromarray(rgb).save(img_path)
-            return rgb, depth, pos, quat
+            return rgb, depth, seg, pos, quat
     
     def change_env(self, urdf):
         self.env.close()
@@ -50,7 +50,7 @@ class train():
             term = True
         
         action = np.array(np.append(np.append(xy_action, z_action), 0))
-        print("action: ", action)
+        # action /= np.linalg.norm(action)
         return action, term
 
 
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args.test)
 
-    trainer = train()
+    trainer = train(episodes=5)
     list_urdf = listURDF().list_URDF()
     num_urdf = len(list_urdf)
     
@@ -76,15 +76,34 @@ if __name__ == "__main__":
         # Move robot above obj and collect images
         images_info = []
         term = False
-        i = 0
         while not term:
-            i += 1
             action, term = trainer.move_in_frame(observation)
-            observation, reward, terminated, truncated, info = trainer.env.step(action * 3)
-            img_path = f"final/images/test_{i}.jpg"
-            rgb, depth, pos, quat = trainer.take_pic(img_path) 
-            images_info.append( (rgb, depth, pos, quat) )
-        time.sleep(2)
+            observation, reward, terminated, truncated, info = trainer.env.step(action * 3) # TODO: Improve this thing's precision
+
+        print("Reached Top: Init Recon")
+        time.sleep(0.5)
+        
+        recon = reconstruct()
+        img_path = f"final/images/test_{i}.jpg"
+        rgb, depth, seg, pos, quat = trainer.take_pic(img_path) 
+
+        object_id = trainer.env.sim._bodies_idx["object"]
+        mask = seg == object_id
+        depth[~mask] = 0
+        rgb[~mask] = 0
+
+        intrinsic = trainer.cam.compute_intrinsics()
+        pc = recon.create_pointcloud(rgb, depth, intrinsic)
+        recon.viz_pc(pc)
+        # TODO: Remove Background and green cube
+
+        cpc = recon.clean_global_pc(pc)
+
+        print("POINT CLOUD: ", pc)
+        print("CLEANED POINT CLOUD", cpc.shape)
+        recon.viz_pc(recon.numpy_to_pc(cpc)) 
+        # time.sleep(3)
+
 
 
         # # potentially add additional pictures here from other angles to make a better picture
@@ -94,35 +113,45 @@ if __name__ == "__main__":
         # # Could also just take pics around the object and not make it relate to being eye-in-hand
         
 
-        dataset = []
-        for (rgb, depth, pos, quat) in images_info:
-            intrinsic = trainer.cam.compute_intrinsics()
-            # camera_pose = trainer.cam.compute_xform(pos, quat)
-            camera_pose = trainer.cam.compute_xform(pos, (1, 0, 0, 0))
-            dataset.append( (rgb, depth, intrinsic, camera_pose) )
-        recon = reconstruct()
-
-        ## TODO: TEST
-        i = 0
-        for (rgb, depth, intrinsic, camera_pose) in dataset:
-            pc = recon.create_pointcloud(rgb, depth, intrinsic)
-            i += 1
-            # if i % 10 == 0:
-                # recon.viz_pc(pc)
-
-        global_pc = recon.create_global_pointcloud(dataset)
-        recon.viz_pc(global_pc)
-        # trimmed_global_pc = recon.clean_global_pc(global_pc=global_pc)
-        # print("========")
-        # print(trimmed_global_pc)
-        # recon.viz_pc(trimmed_global_pc)
-        # # ENDTEST
-
-        # for j in range(trainer.time_steps):
-
         #     action = None # TODO Create a model
         #     observation, reward, terminated, truncated, info = trainer.env.step(action)
         #     pass # TODO Finish the rest of the logic
 
     print("-----Terminating Env-----")
     trainer.env.close()
+
+
+
+
+
+
+
+
+# Notes:
+# while not term:
+#     action, term = trainer.move_in_frame(observation)
+#     observation, reward, terminated, truncated, info = trainer.env.step(action * 3)
+#     # img_path = f"final/images/test_{i}.jpg"
+#     # rgb, depth, seg, pos, quat = trainer.take_pic(img_path) 
+#     # images_info.append( (rgb, depth, pos, quat) )
+# time.sleep(0.5)
+
+
+# dataset = []
+# for (rgb, depth, pos, quat) in images_info:
+#     intrinsic = trainer.cam.compute_intrinsics()
+#     # camera_pose = trainer.cam.compute_xform(pos, quat)
+#     camera_pose = trainer.cam.compute_xform(pos, quat)
+#     dataset.append( (rgb, depth, intrinsic, camera_pose) )
+# recon = reconstruct()
+
+# ## TODO: TEST
+# i = 0
+# for (rgb, depth, intrinsic, camera_pose) in dataset:
+#     pc = recon.create_pointcloud(rgb, depth, intrinsic)
+# global_pc = recon.create_global_pointcloud(dataset)
+# recon.viz_pc(global_pc)
+# trimmed_global_pc = recon.clean_global_pc(global_pc=global_pc)
+# recon.viz_pc(trimmed_global_pc)
+
+# for j in range(trainer.time_steps):

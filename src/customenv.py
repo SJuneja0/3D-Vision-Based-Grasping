@@ -27,7 +27,7 @@ if __name__ == "__main__":
     env = MyRobotTaskEnv(render_mode="human")
 
     cam = camera(pb_client=env.sim.physics_client)
-    rgb, _, _, _ = cam.renderEE(robot_id=env.sim._bodies_idx["panda"])
+    rgb, depth, seg, pos, quat = cam.renderEE(robot_id=env.sim._bodies_idx["panda"])
     img_path = f"src/cam_test.png"
     Image.fromarray(rgb).save(img_path)
 
