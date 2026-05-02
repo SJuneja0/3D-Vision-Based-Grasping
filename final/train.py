@@ -45,12 +45,13 @@ class train():
         z_action = obj_pose[2] + z_offset - robot_pose[2]
 
         term = False
-        if abs(np.sum(xy_action) + z_action) < 0.01:
-        # if abs(np.sum(xy_action)) < 0.2:
+        if abs(np.sum(xy_action) + z_action) < 0.001:
             term = True
         
         action = np.array(np.append(np.append(xy_action, z_action), 0))
-        # action /= np.linalg.norm(action)
+        if np.linalg.norm(action) < 0.1:
+            action /= np.linalg.norm(action)
+            action *= 0.1
         return action, term
 
 
@@ -71,50 +72,47 @@ if __name__ == "__main__":
         rand_urdf = list_urdf[random.randint(0, num_urdf-1)]
         trainer.init_env(rand_urdf) if trainer.env is None else trainer.change_env(rand_urdf)
         observation, info = trainer.env.reset()
-        # time.sleep(2)
+
 
         # Move robot above obj and collect images
         images_info = []
         term = False
         while not term:
             action, term = trainer.move_in_frame(observation)
-            observation, reward, terminated, truncated, info = trainer.env.step(action * 3) # TODO: Improve this thing's precision
-
+            observation, reward, terminated, truncated, info = trainer.env.step(action) # TODO: Improve this thing's precision
         print("Reached Top: Init Recon")
         time.sleep(0.5)
         
+        # Take pic from top
         recon = reconstruct()
         img_path = f"final/images/test_{i}.jpg"
         rgb, depth, seg, pos, quat = trainer.take_pic(img_path) 
 
+        # Mask out only the obj
         object_id = trainer.env.sim._bodies_idx["object"]
         mask = seg == object_id
         depth[~mask] = 0
         rgb[~mask] = 0
 
+        # create the point cloud
         intrinsic = trainer.cam.compute_intrinsics()
         pc = recon.create_pointcloud(rgb, depth, intrinsic)
-        recon.viz_pc(pc)
-        # TODO: Remove Background and green cube
+        # recon.viz_pc(pc)
 
+        # clean the pointcloud for the NN
+        # including making it 1024 points
         cpc = recon.clean_global_pc(pc)
 
-        print("POINT CLOUD: ", pc)
-        print("CLEANED POINT CLOUD", cpc.shape)
-        recon.viz_pc(recon.numpy_to_pc(cpc)) 
-        # time.sleep(3)
-
-
+        # recon.viz_pc(recon.numpy_to_pc(cpc)) 
 
         # # potentially add additional pictures here from other angles to make a better picture
 
-        # # Create a 3D representation of the object based on the photos
-        # # TODO: Need to remove background, can only have object in point cloud -> Color filterings?
-        # # Could also just take pics around the object and not make it relate to being eye-in-hand
-        
+        for j in range(trainer.time_steps):
+            model = model()
+            input = model.format_input(cpc, observation)
+            action = model(input)
+            observation, reward, terminated, truncated, info = trainer.env.step(action)
 
-        #     action = None # TODO Create a model
-        #     observation, reward, terminated, truncated, info = trainer.env.step(action)
         #     pass # TODO Finish the rest of the logic
 
     print("-----Terminating Env-----")
