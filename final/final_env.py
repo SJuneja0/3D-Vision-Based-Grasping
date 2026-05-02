@@ -10,10 +10,10 @@ import time
 class FinalEnv(RobotTaskEnv):
     """My robot-task environment."""
 
-    def __init__(self, render_mode):
+    def __init__(self, render_mode, urdf):
         self.sim = PyBullet(render_mode=render_mode)
         self.robot = Panda(self.sim)
-        self.task = FinalPickAndPlace(self.sim)        
+        self.task = FinalPickAndPlace(self.sim, urdf)        
 
         super().__init__(self.robot, self.task)
 

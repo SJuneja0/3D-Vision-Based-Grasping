@@ -10,6 +10,7 @@ from PIL import Image
 from list_urdf import listURDF
 import argparse
 import random
+from reconstruct import reconstruct
 
 class train():
     def __init__(self, episodes=3, time_steps=500):
@@ -45,8 +46,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args.test)
 
+    
+
     trainer = train()
-    list_urdf = listURDF().list_URDF()
+    list_urdf = args.agent.list_URDF()
     num_urdf = len(list_urdf)
     
     for i in range(trainer.episodes):
