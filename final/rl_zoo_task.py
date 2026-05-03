@@ -5,6 +5,8 @@ import numpy as np
 class FinalPickAndPlace(PickAndPlace):
     def __init__(self, sim, urdf):
         self.sim = sim
+        ASSET_PATH = "/home/sahen/LBR/Final Project/data/object2urdf/examples/ycb_assets/"
+        self.sim.physics_client.setAdditionalSearchPath(ASSET_PATH)
         self.sim.physics_client.setAdditionalSearchPath("data/object2urdf/examples/ycb_assets/")
         self.urdf = urdf
         super().__init__(sim)
@@ -41,9 +43,10 @@ class FinalPickAndPlace(PickAndPlace):
 
         print("Object Height: ", object_height)
 
-        object_position = np.array([0.1, 0.0, object_height / 2])
-        noise = self.np_random.uniform(self.obj_range_low, self.obj_range_high)
+        # object_position = np.array([0, 0.0, object_height / 2])
+        # noise = self.np_random.uniform(self.obj_range_low, self.obj_range_high)
         # object_position += noise
+        object_position = np.array([0.1, 0.0, object_height / 2])
         print("object position: ", object_position)
         return object_position
 

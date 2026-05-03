@@ -50,12 +50,21 @@ class reconstruct():
         # Remove Outliers
         global_pc, _ = global_pc.remove_statistical_outlier(nb_neighbors=nb_neighbors, std_ratio=std_ratio)
 
+        if len(global_pc.points) == 0:
+            print("WARNING: empty point cloud")
+            return np.zeros((num_points, 3), dtype=np.float32)
+        else:
+            print("POINT CLOUD FOUND")
+        
         # Normalize points around a center and size
         global_points = np.asarray(global_pc.points)
         center = global_points.mean(axis=0)
         global_points -= center
         scale = np.max(np.linalg.norm(global_points, axis=1))
-        global_points /= scale
+        if scale > 1e-8:
+            global_points /= scale
+        else:
+            global_points[:] = 0
 
         # Fix the number of points for training a NN (Fixed input size)
         if len(global_points) > num_points:

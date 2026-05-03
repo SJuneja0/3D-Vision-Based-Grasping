@@ -1,0 +1,1 @@
+python rl-baselines3-zoo/train.py --algo sac --env MyPandaEnv-v0 --n-timesteps 10000 -P --eval-freq 500

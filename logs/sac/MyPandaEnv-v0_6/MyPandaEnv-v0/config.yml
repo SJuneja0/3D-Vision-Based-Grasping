@@ -1,0 +1,21 @@
+!!python/object/apply:collections.OrderedDict
+- - - batch_size
+    - 256
+  - - buffer_size
+    - 1000000
+  - - gamma
+    - 0.99
+  - - gradient_steps
+    - 1
+  - - learning_rate
+    - 0.0003
+  - - n_timesteps
+    - 1000000
+  - - policy
+    - MultiInputPolicy
+  - - policy_kwargs
+    - dict(features_extractor_class=rl_zoo3.policy.PointCloudExtractor)
+  - - tau
+    - 0.005
+  - - train_freq
+    - 1

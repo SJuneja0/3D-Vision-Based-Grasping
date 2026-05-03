@@ -28,11 +28,11 @@ class train():
         self.cam = camera(pb_client=self.env.sim.physics_client)
 
     def take_pic(self, img_path=None):
+            rgb, depth, seg, pos, quat = self.cam.renderEE(robot_id=self.env.sim._bodies_idx["panda"])
             if img_path == None:
                 print("NO VALID IMAGE PATH PASSED")
-                return None
-            rgb, depth, seg, pos, quat = self.cam.renderEE(robot_id=self.env.sim._bodies_idx["panda"])
-            Image.fromarray(rgb).save(img_path)
+            else:
+                Image.fromarray(rgb).save(img_path)
             return rgb, depth, seg, pos, quat
     
     def change_env(self, urdf):
@@ -55,6 +55,10 @@ class train():
             action /= np.linalg.norm(action)
             action *= 0.1
         return action, term
+    
+    
+
+
 
 
 
@@ -81,13 +85,13 @@ if __name__ == "__main__":
 
 
         # Move robot above obj and collect images
-        images_info = []
-        term = False
-        while not term:
-            action, term = trainer.move_in_frame(observation)
-            observation, reward, terminated, truncated, info = trainer.env.step(action) # TODO: Improve this thing's precision
-        print("Reached Top: Init Recon")
-        time.sleep(0.5)
+        # images_info = []
+        # term = False
+        # while not term:
+        #     action, term = trainer.move_in_frame(observation)
+        #     observation, reward, terminated, truncated, info = trainer.env.step(action) # TODO: Improve this thing's precision
+        # print("Reached Top: Init Recon")
+        # time.sleep(0.5)
         
         # Take pic from top
         recon = reconstruct()
@@ -103,13 +107,13 @@ if __name__ == "__main__":
         # create the point cloud
         intrinsic = trainer.cam.compute_intrinsics()
         pc = recon.create_pointcloud(rgb, depth, intrinsic)
-        # recon.viz_pc(pc)
+        recon.viz_pc(pc)
 
         # clean the pointcloud for the NN
         # including making it 1024 points
         cpc = recon.clean_global_pc(pc)
 
-        # recon.viz_pc(recon.numpy_to_pc(cpc)) 
+        recon.viz_pc(recon.numpy_to_pc(cpc)) 
 
         # # potentially add additional pictures here from other angles to make a better picture
 
@@ -119,31 +123,31 @@ if __name__ == "__main__":
 
         done = False
         j = 0
-        while not done and j < trainer.time_steps:
-            obs = observation["observation"]
-            ag = observation["achieved_goal"]
-            dg = observation["desired_goal"]
-            input_obs = np.concat((obs, ag, dg))
+        # while not done and j < trainer.time_steps:
+        #     obs = observation["observation"]
+        #     ag = observation["achieved_goal"]
+        #     dg = observation["desired_goal"]
+        #     input_obs = np.concat((obs, ag, dg))
 
-            input = {"pc": cpc, "observation" : input_obs}
+        #     input = {"pc": cpc, "observation" : input_obs}
 
-            cpc = torch.tensor(cpc, dtype=torch.float32).unsqueeze(0)
-            input_obs = torch.tensor(input_obs, dtype=torch.float32).unsqueeze(0)
+        #     cpc = torch.tensor(cpc, dtype=torch.float32).unsqueeze(0)
+        #     input_obs = torch.tensor(input_obs, dtype=torch.float32).unsqueeze(0)
 
-            action = model(pc=cpc, observation=input_obs)
-            observation, reward, terminated, truncated, info = trainer.env.step(action.detach().numpy()[0])
+        #     action = model(pc=cpc, observation=input_obs)
+        #     observation, reward, terminated, truncated, info = trainer.env.step(action.detach().numpy()[0])
 
-            reward = torch.tensor(reward, dtype=torch.float32)
-            # log_prob = model.log_prob(action)
-            # loss = -(log_prob * reward)
-            loss = -reward
+        #     reward = torch.tensor(reward, dtype=torch.float32)
+        #     # log_prob = model.log_prob(action)
+        #     # loss = -(log_prob * reward)
+        #     loss = -reward
             
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+        #     optimizer.zero_grad()
+        #     loss.backward()
+        #     optimizer.step()
 
-            done = terminated
+        #     done = terminated
 
 
     print("-----Terminating Env-----")
