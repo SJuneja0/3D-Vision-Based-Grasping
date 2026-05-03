@@ -15,13 +15,13 @@ class Policy(nn.Module):
         self.mlp = nn.Sequential(
             nn.Linear(192, 128),
             nn.ReLU(),
-            nn.Linear(128, 7)  # action dim
+            nn.Linear(128, 4)
         )
 
-    def forward(self, pc, state):
+    def forward(self, pc, observation):
         pc_feat = self.pc_encoder(pc)
-        state_feat = self.state_encoder(state)
+        observation_feat = self.state_encoder(observation)
 
-        x = torch.cat([pc_feat, state_feat], dim=-1)
+        x = torch.cat([pc_feat, observation_feat], dim=-1)
 
         return self.mlp(x)

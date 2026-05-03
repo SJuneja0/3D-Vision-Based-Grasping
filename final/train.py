@@ -13,6 +13,8 @@ import random
 from reconstruct import reconstruct
 import numpy as np
 import time
+from policy import Policy
+import torch
 
 class train():
     def __init__(self, episodes=1, time_steps=500):
@@ -63,9 +65,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args.test)
 
-    trainer = train(episodes=5)
+    trainer = train(episodes=1)
     list_urdf = listURDF().list_URDF()
     num_urdf = len(list_urdf)
+
+    # Torch values
+    model = Policy()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
     
     for i in range(trainer.episodes):
         # Initiate env with random object
@@ -107,11 +113,37 @@ if __name__ == "__main__":
 
         # # potentially add additional pictures here from other angles to make a better picture
 
-        for j in range(trainer.time_steps):
-            model = model()
-            input = model.format_input(cpc, observation)
-            action = model(input)
-            observation, reward, terminated, truncated, info = trainer.env.step(action)
+        print("OBSERVATION: ", observation)
+        print("POINT CLOUD: ", cpc)
+        print("PC SHAPE: ", cpc.shape)
+
+        done = False
+        j = 0
+        while not done and j < trainer.time_steps:
+            obs = observation["observation"]
+            ag = observation["achieved_goal"]
+            dg = observation["desired_goal"]
+            input_obs = np.concat((obs, ag, dg))
+
+            input = {"pc": cpc, "observation" : input_obs}
+
+            cpc = torch.tensor(cpc, dtype=torch.float32).unsqueeze(0)
+            input_obs = torch.tensor(input_obs, dtype=torch.float32).unsqueeze(0)
+
+            action = model(pc=cpc, observation=input_obs)
+            observation, reward, terminated, truncated, info = trainer.env.step(action.detach().numpy()[0])
+
+            reward = torch.tensor(reward, dtype=torch.float32)
+            # log_prob = model.log_prob(action)
+            # loss = -(log_prob * reward)
+            loss = -reward
+            
+
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+            done = terminated
 
 
     print("-----Terminating Env-----")

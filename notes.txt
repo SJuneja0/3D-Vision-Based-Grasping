@@ -12,6 +12,7 @@ Steps:
 - Adjust all URDF's to be proper for the env //
 - Move table infront of Robot //
 - Figure out the rest of the task params (spawn-space of urdf's) //
+- Edit env observation on .step to return a rendering of the image
 
 2. Implement 3D rendering programs
 2a. Develop initial pipeline
