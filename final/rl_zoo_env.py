@@ -21,8 +21,7 @@ class FinalEnv(RobotTaskEnv):
         self.task = FinalPickAndPlace(self.sim, urdf) 
         self.recon = reconstruct()
         self.cam = camera(pb_client=self.sim.physics_client)
-
-        self.init_flag = False
+        self.pc = np.zeros((1024, 3), dtype=np.float32)
         
         super().__init__(self.robot, self.task)
         time.sleep(1)
@@ -43,27 +42,18 @@ class FinalEnv(RobotTaskEnv):
         task_obs = self.task.get_obs().astype(np.float32)  # object position, velocity, etc...
         observation = np.concatenate([robot_obs, task_obs])
         achieved_goal = self.task.get_achieved_goal().astype(np.float32)
-        if self.init_flag:
-            return {
-                "observation": observation,
-                "achieved_goal": achieved_goal,
-                "desired_goal": self.task.get_goal().astype(np.float32),
-                "point_cloud": np.zeros((1024, 3), dtype=np.float32),
-                "valid_pc": np.array([0], dtype=np.float32),
-            }
+        if (self.pc == np.zeros((1024, 3), dtype=np.float32)).all():
+            self.pc = self.get_pointcloud()
+            vpc = np.array([0])
         else:
-            pc = self.get_pointcloud()
-            if (pc == np.zeros((1024, 3), dtype=np.float32)).all():
-                vpc = np.array([0])
-            else:
-                vpc = np.array([1])
-            return {
-                "observation": observation,
-                "achieved_goal": achieved_goal,
-                "desired_goal": self.task.get_goal().astype(np.float32),
-                "point_cloud": pc.astype(np.float32),
-                "valid_pc": vpc.astype(np.float32),
-            }
+            vpc = np.array([1])
+        return {
+            "observation": observation,
+            "achieved_goal": achieved_goal,
+            "desired_goal": self.task.get_goal().astype(np.float32),
+            "point_cloud": self.pc.astype(np.float32),
+            "valid_pc": vpc.astype(np.float32),
+        }
     
     def get_pointcloud(self):
         rgb, depth, seg, pos, quat = self.cam.renderEE(robot_id=self.sim._bodies_idx["panda"])

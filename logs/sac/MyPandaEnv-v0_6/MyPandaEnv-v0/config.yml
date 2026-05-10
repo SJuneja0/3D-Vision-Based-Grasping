@@ -14,7 +14,7 @@
   - - policy
     - MultiInputPolicy
   - - policy_kwargs
-    - dict(features_extractor_class=rl_zoo3.policy.PointCloudExtractor)
+    - dict(features_extractor_class=rl_zoo3.policy.Policy)
   - - tau
     - 0.005
   - - train_freq

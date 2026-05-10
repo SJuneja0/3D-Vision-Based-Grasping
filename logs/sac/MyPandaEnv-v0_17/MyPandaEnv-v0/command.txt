@@ -1,0 +1,1 @@
+python3 rl-baselines3-zoo/train.py --algo sac --env MyPandaEnv-v0 --n-timesteps 500000 --tensorboard-log logs/tb/

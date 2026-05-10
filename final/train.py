@@ -69,7 +69,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args.test)
 
-    trainer = train(episodes=1)
+    trainer = train(episodes=5)
     list_urdf = listURDF().list_URDF()
     num_urdf = len(list_urdf)
 
